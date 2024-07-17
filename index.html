@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>割り勘計算アプリ</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 20px;
+        }
+        .category {
+            margin-bottom: 20px;
+        }
+        .output {
+            margin-top: 20px;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">割り勘計算アプリ</h1>
+        <div class="form-group">
+            <label for="totalAmount">支払金額 (円):</label>
+            <input type="number" id="totalAmount" class="form-control" min="0" oninput="saveData()">
+        </div>
+        <div class="form-group">
+            <label for="participants">参加人数:</label>
+            <input type="number" id="participants" class="form-control" min="1" oninput="saveData()">
+        </div>
+        <div id="categories">
+            <h3>参加者のカテゴリ</h3>
+            <!-- カテゴリはJavaScriptで追加します -->
+        </div>
+        <button class="btn btn-primary" onclick="addCategory()">カテゴリ追加</button>
+        <button class="btn btn-success" onclick="calculate()">計算</button>
+
+        <div id="output" class="output mt-4"></div>
+    </div>
+
+    <!-- フライテキスト（通知メッセージ） -->
+    <div class="toast" id="toast" data-delay="3000">
+        <div class="toast-header">
+            <strong class="mr-auto">通知</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
+        </div>
+        <div class="toast-body" id="toast-body"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+        });
+
+        function addCategory(name = '', count = 1, weight = 1) {
+            const categoriesDiv = document.getElementById('categories');
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'form-group category';
+
+            categoryDiv.innerHTML = `
+                <label>カテゴリ名:</label>
+                <input type="text" class="form-control categoryName" value="${name}" oninput="saveData()">
+                <label>人数:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-outline-secondary" onclick="decreaseCount(this)">-</button>
+                    </div>
+                    <input type="number" class="form-control categoryParticipants" value="${count}" min="1" readonly>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" onclick="increaseCount(this)">+</button>
+                    </div>
+                </div>
+                <label>傾斜:</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-outline-secondary" onclick="decreaseWeight(this)">-</button>
+                    </div>
+                    <input type="number" class="form-control categoryWeight" value="${weight}" min="0" step="0.1" readonly>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" onclick="increaseWeight(this)">+</button>
+                    </div>
+                </div>
+                <button class="btn btn-danger mt-2" onclick="removeCategory(this)">削除</button>
+            `;
+
+            categoriesDiv.appendChild(categoryDiv);
+            saveData();
+        }
+
+        function decreaseCount(button) {
+            const input = button.parentElement.nextElementSibling;
+            let count = parseInt(input.value, 10);
+            if (count > 1) {
+                input.value = count - 1;
+                saveData();
+            }
+        }
+
+        function increaseCount(button) {
+            const input = button.parentElement.previousElementSibling;
+            const participants = parseInt(document.getElementById('participants').value, 10);
+            let currentTotal = Array.from(document.getElementsByClassName('categoryParticipants'))
+                                   .reduce((sum, input) => sum + parseInt(input.value, 10), 0);
+            let count = parseInt(input.value, 10);
+            if (currentTotal < participants) {
+                input.value = count + 1;
+                saveData();
+            } else {
+                showToast('参加人数を超えることはできません');
+            }
+        }
+
+        function decreaseWeight(button) {
+            const input = button.parentElement.nextElementSibling;
+            let weight = parseFloat(input.value);
+            if (weight > 0) {
+                input.value = (weight - 0.1).toFixed(1);
+                saveData();
+            }
+        }
+
+        function increaseWeight(button) {
+            const input = button.parentElement.previousElementSibling;
+            let weight = parseFloat(input.value);
+            input.value = (weight + 0.1).toFixed(1);
+            saveData();
+        }
+
+        function removeCategory(button) {
+            const categoryDiv = button.parentElement;
+            categoryDiv.remove();
+            saveData();
+        }
+
+        function calculate() {
+            const totalAmount = parseInt(document.getElementById('totalAmount').value, 10);
+            const participants = parseInt(document.getElementById('participants').value, 10);
+
+            if (isNaN(totalAmount) || isNaN(participants) || participants <= 0) {
+                showToast('有効な支払金額と参加人数を入力してください');
+                return;
+            }
+
+            const categoryElements = document.getElementsByClassName('category');
+            let totalWeight = 0;
+            let categoryData = [];
+
+            for (let categoryElement of categoryElements) {
+                const name = categoryElement.querySelector('.categoryName').value;
+                const count = parseInt(categoryElement.querySelector('.categoryParticipants').value, 10);
+                const weight = parseFloat(categoryElement.querySelector('.categoryWeight').value);
+
+                if (!name || isNaN(count) || count <= 0 || isNaN(weight) || weight < 0) {
+                    showToast('有効なカテゴリ情報を入力してください');
+                    return;
+                }
+
+                categoryData.push({ name, count, weight });
+                totalWeight += weight * count;
+            }
+
+            if (categoryData.reduce((sum, category) => sum + category.count, 0) !== participants) {
+                showToast('カテゴリごとの人数の合計が参加人数と一致しません');
+                return;
+            }
+
+            let output = document.getElementById('output');
+            output.innerHTML = '';
+
+            const baseAmount = totalAmount / totalWeight;
+            let individualAmounts = categoryData.map(category => ({
+                name: category.name,
+                amount: Math.round(baseAmount * category.weight / 500) * 500,
+                count: category.count,
+                subtotal: Math.round(baseAmount * category.weight / 500) * 500 * category.count
+            }));
+
+            let distributedAmount = individualAmounts.reduce((sum, category) => sum + category.subtotal, 0);
+            let remainder = totalAmount - distributedAmount;
+            let calculatedTotal = distributedAmount + remainder;
+
+            output.innerHTML = `
+                <h3>計算結果:</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>カテゴリ名</th>
+                            <th>人数</th>
+                            <th>1人あたりの金額 (円)</th>
+                            <th>小計 (円)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${individualAmounts.map(category => `
+                            <tr>
+                                <td>${category.name}</td>
+                                <td>${category.count}</td>
+                                <td>${category.amount}</td>
+                                <td>${category.subtotal}</td>
+                            </tr>
+                        `).join('')}
+                        <tr>
+                            <td colspan="3">端数</td>
+                            <td>${remainder}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><strong>合計</strong></td>
+                            <td><strong>${calculatedTotal}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            if (calculatedTotal !== totalAmount) {
+                showToast('合計金額が一致しません。計算を確認してください。');
+            }
+        }
+
+        function saveData() {
+            const totalAmount = document.getElementById('totalAmount').value;
+            const participants = document.getElementById('participants').value;
+            const categoryElements = document.getElementsByClassName('category');
+
+            let categories = [];
+            for (let categoryElement of categoryElements) {
+                const name = categoryElement.querySelector('.categoryName').value;
+                const count = categoryElement.querySelector('.categoryParticipants').value;
+                const weight = categoryElement.querySelector('.categoryWeight').value;
+
+                categories.push({ name, count, weight });
+            }
+
+            const data = {
+                totalAmount,
+                participants,
+                categories
+            };
+
+            localStorage.setItem('splitBillData', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const data = JSON.parse(localStorage.getItem('splitBillData'));
+
+            if (data) {
+                document.getElementById('totalAmount').value = data.totalAmount;
+                document.getElementById('participants').value = data.participants;
+
+                document.getElementById('categories').innerHTML = '<h3>参加者のカテゴリ</h3>';
+                data.categories.forEach(category => {
+                    addCategory(category.name, category.count, category.weight);
+                });
+            }
+        }
+
+        function showToast(message) {
+            const toastBody = document.getElementById('toast-body');
+            toastBody.textContent = message;
+            $('.toast').toast('show');
+        }
+    </script>
+</body>
+</html>
