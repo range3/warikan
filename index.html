@@ -32,7 +32,7 @@
         </div>
         <div class="form-group">
             <label for="participants">参加人数:</label>
-            <input type="number" id="participants" class="form-control" min="1" oninput="saveData()">
+            <input type="number" id="participants" class="form-control" min="1" oninput="updateCategoryMaxParticipants(); saveData()">
         </div>
         <div id="categories">
             <h3>参加者のカテゴリ</h3>
@@ -61,7 +61,15 @@
             loadData();
         });
 
-        function addCategory(name = '', count = 1, weight = 1) {
+        function addCategory(name = '', count = null, weight = 1) {
+            const participants = parseInt(document.getElementById('participants').value, 10);
+            const otherCountsTotal = Array.from(document.getElementsByClassName('categoryParticipants'))
+                                          .reduce((sum, input) => sum + parseInt(input.value, 10), 0);
+            const maxParticipants = isNaN(participants) ? 0 : participants;
+            count = count === null ? maxParticipants - otherCountsTotal : count;
+
+            if (count < 0) count = 0;
+
             const categoriesDiv = document.getElementById('categories');
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'form-group category';
@@ -69,16 +77,8 @@
             categoryDiv.innerHTML = `
                 <label>カテゴリ名:</label>
                 <input type="text" class="form-control categoryName" value="${name}" oninput="saveData()">
-                <label>人数:</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <button class="btn btn-outline-secondary" onclick="decreaseCount(this)">-</button>
-                    </div>
-                    <input type="number" class="form-control categoryParticipants" value="${count}" min="1" readonly>
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" onclick="increaseCount(this)">+</button>
-                    </div>
-                </div>
+                <label>人数: <span class="categoryParticipantsLabel">${count}</span></label>
+                <input type="range" class="custom-range categoryParticipants" value="${count}" min="0" max="${maxParticipants}" oninput="updateLabelAndSave(this)">
                 <label>傾斜:</label>
                 <div class="input-group">
                     <div class="input-group-prepend">
@@ -96,27 +96,11 @@
             saveData();
         }
 
-        function decreaseCount(button) {
-            const input = button.parentElement.nextElementSibling;
-            let count = parseInt(input.value, 10);
-            if (count > 1) {
-                input.value = count - 1;
-                saveData();
-            }
-        }
-
-        function increaseCount(button) {
-            const input = button.parentElement.previousElementSibling;
-            const participants = parseInt(document.getElementById('participants').value, 10);
-            let currentTotal = Array.from(document.getElementsByClassName('categoryParticipants'))
-                                   .reduce((sum, input) => sum + parseInt(input.value, 10), 0);
-            let count = parseInt(input.value, 10);
-            if (currentTotal < participants) {
-                input.value = count + 1;
-                saveData();
-            } else {
-                showToast('参加人数を超えることはできません');
-            }
+        function updateLabelAndSave(input) {
+            const label = input.previousElementSibling.querySelector('.categoryParticipantsLabel');
+            label.textContent = input.value;
+            validateParticipants(input);
+            saveData();
         }
 
         function decreaseWeight(button) {
@@ -141,6 +125,32 @@
             saveData();
         }
 
+        function updateCategoryMaxParticipants() {
+            const participants = parseInt(document.getElementById('participants').value, 10);
+            const maxParticipants = isNaN(participants) ? 0 : participants;
+
+            const categoryElements = document.getElementsByClassName('category');
+            for (let categoryElement of categoryElements) {
+                const rangeInput = categoryElement.querySelector('.categoryParticipants');
+                rangeInput.max = maxParticipants;
+                if (parseInt(rangeInput.value, 10) > maxParticipants) {
+                    rangeInput.value = maxParticipants;
+                    categoryElement.querySelector('.categoryParticipantsLabel').textContent = maxParticipants;
+                }
+            }
+            saveData();
+        }
+
+        function validateParticipants(input) {
+            const participants = parseInt(document.getElementById('participants').value, 10);
+            let currentTotal = Array.from(document.getElementsByClassName('categoryParticipants'))
+                                   .reduce((sum, el) => sum + (el !== input ? parseInt(el.value, 10) : 0), 0);
+            if (currentTotal + parseInt(input.value, 10) > participants) {
+                input.value = participants - currentTotal;
+                input.previousElementSibling.querySelector('.categoryParticipantsLabel').textContent = input.value;
+            }
+        }
+
         function calculate() {
             const totalAmount = parseInt(document.getElementById('totalAmount').value, 10);
             const participants = parseInt(document.getElementById('participants').value, 10);
@@ -159,7 +169,7 @@
                 const count = parseInt(categoryElement.querySelector('.categoryParticipants').value, 10);
                 const weight = parseFloat(categoryElement.querySelector('.categoryWeight').value);
 
-                if (!name || isNaN(count) || count <= 0 || isNaN(weight) || weight < 0) {
+                if (!name || isNaN(count) || count < 0 || isNaN(weight) || weight < 0) {
                     showToast('有効なカテゴリ情報を入力してください');
                     return;
                 }
