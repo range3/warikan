@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>割り勘計算アプリ</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <style>
         body {
             margin: 20px;
@@ -86,8 +86,8 @@
             <label for="participants">参加人数:</label>
             <input type="number" id="participants" class="form-control" min="1" oninput="updateCategoryMaxParticipants(); updateState()">
         </div>
+        <h3>参加者のカテゴリ</h3>
         <div id="categories">
-            <h3>参加者のカテゴリ</h3>
             <!-- カテゴリはJavaScriptで追加します -->
         </div>
         <button class="btn btn-primary btn-block mb-4" onclick="addCategory()">カテゴリ追加</button>
@@ -124,7 +124,7 @@
         <div class="toast-body" id="toast-body"></div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
@@ -229,7 +229,7 @@
             document.getElementById('participants').value = data.participants;
             document.getElementById('roundingUnit').value = data.roundingUnit;
 
-            document.getElementById('categories').innerHTML = '<h3>参加者のカテゴリ</h3>';
+            document.getElementById('categories').innerHTML = '';
             data.categories.forEach(category => {
                 addCategory(category.name, category.count, category.weight);
             });
@@ -290,6 +290,7 @@
                 handle: '.category-card-header',
                 animation: 150,
                 touchStartThreshold: 10,
+                filter: '.delete-btn',
                 onStart: function(evt) {
                     evt.item.querySelector('.delete-btn').style.pointerEvents = 'none';
                 },
