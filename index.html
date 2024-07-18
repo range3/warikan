@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>割り勘計算アプリ</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
     <style>
         body {
             margin: 20px;
@@ -12,9 +13,38 @@
         .category-card {
             border: 1px solid #ddd;
             border-radius: 5px;
-            padding: 15px;
             margin-bottom: 20px;
             background-color: #f9f9f9;
+            overflow: hidden;
+        }
+        .category-card-header {
+            background-color: #e9ecef;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+        }
+        .category-card-body {
+            padding: 15px;
+        }
+        .delete-btn {
+            background-color: #ced4da;
+            border: 0;
+            padding: 8px 15px;
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+            color: #495057;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .delete-btn:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        .delete-btn:hover:not(:disabled) {
+            background-color: #dc3545;
+            color: #fff;
         }
         .output {
             margin-top: 20px;
@@ -89,6 +119,7 @@
             if (document.getElementsByClassName('category').length === 0) {
                 addCategory();
             }
+            makeCategoriesSortable();
         });
 
         function addCategory(name = '', count = null, weight = 1) {
@@ -102,32 +133,46 @@
 
             const categoriesDiv = document.getElementById('categories');
             const categoryDiv = document.createElement('div');
-            categoryDiv.className = 'form-group category-card category';
+            categoryDiv.className = 'category-card category';
 
             const categoryIndex = document.getElementsByClassName('category-card').length;
-            const isFirstCategory = categoryIndex === 0;
-            const placeholder = isFirstCategory ? '社会人' : `役職${categoryIndex}`;
+            const placeholder = categoryIndex === 0 ? '社会人' : `役職${categoryIndex + 1}`;
 
             categoryDiv.innerHTML = `
-                <label>カテゴリ名:</label>
-                <input type="text" class="form-control categoryName" value="${name}" placeholder="${placeholder}" oninput="saveData()">
-                <label>人数: <span class="categoryParticipantsLabel">${count}</span></label>
-                <input type="range" class="custom-range categoryParticipants" value="${count}" min="0" max="${maxParticipants}" oninput="updateLabelAndSave(this)">
-                <label>傾斜:</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <button class="btn btn-outline-secondary" onclick="decreaseWeight(this)">-</button>
-                    </div>
-                    <input type="number" class="form-control categoryWeight" value="${weight}" min="0" step="0.1" readonly>
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" onclick="increaseWeight(this)">+</button>
+                <div class="category-card-header">
+                    <span></span>
+                    <button class="delete-btn" onclick="removeCategory(this)">✕</button>
+                </div>
+                <div class="category-card-body">
+                    <label>カテゴリ名:</label>
+                    <input type="text" class="form-control categoryName" value="${name}" placeholder="${placeholder}" oninput="saveData()">
+                    <label>人数: <span class="categoryParticipantsLabel">${count}</span></label>
+                    <input type="range" class="custom-range categoryParticipants" value="${count}" min="0" max="${maxParticipants}" oninput="updateLabelAndSave(this)">
+                    <label>傾斜:</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-outline-secondary" onclick="decreaseWeight(this)">-</button>
+                        </div>
+                        <input type="number" class="form-control categoryWeight" value="${weight}" min="0" step="0.1" readonly>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" onclick="increaseWeight(this)">+</button>
+                        </div>
                     </div>
                 </div>
-                ${isFirstCategory ? '' : '<button class="btn btn-danger mt-2" onclick="removeCategory(this)">削除</button>'}
             `;
 
             categoriesDiv.appendChild(categoryDiv);
+            updateDeleteButtons();
+            makeCategoriesSortable();
             saveData();
+        }
+
+        function makeCategoriesSortable() {
+            new Sortable(document.getElementById('categories'), {
+                handle: '.category-card-header',
+                animation: 150,
+                onEnd: saveData
+            });
         }
 
         function updateLabelAndSave(input) {
@@ -154,9 +199,21 @@
         }
 
         function removeCategory(button) {
-            const categoryDiv = button.parentElement;
+            const categoryDiv = button.closest('.category-card');
             categoryDiv.remove();
+            updateDeleteButtons();
             saveData();
+        }
+
+        function updateDeleteButtons() {
+            const deleteButtons = document.getElementsByClassName('delete-btn');
+            if (deleteButtons.length === 1) {
+                deleteButtons[0].disabled = true;
+            } else {
+                for (let button of deleteButtons) {
+                    button.disabled = false;
+                }
+            }
         }
 
         function updateCategoryMaxParticipants() {
