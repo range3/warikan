@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>割り勘計算アプリ</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.css">
     <style>
         body {
             margin: 20px;
@@ -127,6 +127,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const dataParam = getDataFromUrl();
@@ -141,7 +142,7 @@
             if (document.getElementsByClassName('category').length === 0) {
                 addCategory();
             }
-            makeCategoriesSortable();
+            makeCategoriesDraggable();
         });
 
         function encodeFormData(data) {
@@ -281,25 +282,15 @@
 
             categoriesDiv.appendChild(categoryDiv);
             updateDeleteButtons();
-            makeCategoriesSortable();
             updateState();
         }
 
-        function makeCategoriesSortable() {
-            new Sortable(document.getElementById('categories'), {
-                handle: '.category-card-header',
-                animation: 150,
-                delay: 100,
-                delayOnTouchOnly: true,
-                touchStartThreshold: 10,
-                filter: '.delete-btn',
-                onStart: function(evt) {
-                    evt.item.querySelector('.delete-btn').style.pointerEvents = 'none';
-                },
-                onEnd: function(evt) {
-                    evt.item.querySelector('.delete-btn').style.pointerEvents = 'auto';
-                    updateState();
-                }
+        function makeCategoriesDraggable() {
+            dragula([document.getElementById('categories')], {
+                moves: (el, container, handle) => handle.classList.contains('category-card-header'),
+                invalid: (el, handle) => handle.classList.contains('delete-btn')
+            }).on('drop', (el, target, source, sibling) => {
+                updateState();
             });
         }
 
