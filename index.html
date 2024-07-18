@@ -9,8 +9,12 @@
         body {
             margin: 20px;
         }
-        .category {
+        .category-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
             margin-bottom: 20px;
+            background-color: #f9f9f9;
         }
         .output {
             margin-top: 20px;
@@ -20,6 +24,12 @@
             top: 20px;
             right: 20px;
             z-index: 9999;
+        }
+        .btn-group {
+            margin-bottom: 20px;
+        }
+        .btn-block {
+            width: 100%;
         }
     </style>
 </head>
@@ -34,11 +44,20 @@
             <label for="participants">参加人数:</label>
             <input type="number" id="participants" class="form-control" min="1" oninput="updateCategoryMaxParticipants(); saveData()">
         </div>
+        <div class="form-group">
+            <label for="roundingUnit">丸め単位:</label>
+            <select id="roundingUnit" class="form-control" onchange="saveData()">
+                <option value="1000">1000円</option>
+                <option value="500">500円</option>
+                <option value="100">100円</option>
+                <option value="1">1円</option>
+            </select>
+        </div>
         <div id="categories">
             <h3>参加者のカテゴリ</h3>
             <!-- カテゴリはJavaScriptで追加します -->
         </div>
-        <button class="btn btn-primary" onclick="addCategory()">カテゴリ追加</button>
+        <button class="btn btn-primary btn-block mb-4" onclick="addCategory()">カテゴリ追加</button>
         <button class="btn btn-success" onclick="calculate()">計算</button>
 
         <div id="output" class="output mt-4"></div>
@@ -59,6 +78,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             loadData();
+            if (document.getElementsByClassName('category').length === 0) {
+                addCategory();
+            }
         });
 
         function addCategory(name = '', count = null, weight = 1) {
@@ -72,11 +94,15 @@
 
             const categoriesDiv = document.getElementById('categories');
             const categoryDiv = document.createElement('div');
-            categoryDiv.className = 'form-group category';
+            categoryDiv.className = 'form-group category-card category';
+
+            const categoryIndex = document.getElementsByClassName('category-card').length;
+            const isFirstCategory = categoryIndex === 0;
+            const placeholder = isFirstCategory ? '社会人' : `役職${categoryIndex}`;
 
             categoryDiv.innerHTML = `
                 <label>カテゴリ名:</label>
-                <input type="text" class="form-control categoryName" value="${name}" oninput="saveData()">
+                <input type="text" class="form-control categoryName" value="${name}" placeholder="${placeholder}" oninput="saveData()">
                 <label>人数: <span class="categoryParticipantsLabel">${count}</span></label>
                 <input type="range" class="custom-range categoryParticipants" value="${count}" min="0" max="${maxParticipants}" oninput="updateLabelAndSave(this)">
                 <label>傾斜:</label>
@@ -89,7 +115,7 @@
                         <button class="btn btn-outline-secondary" onclick="increaseWeight(this)">+</button>
                     </div>
                 </div>
-                <button class="btn btn-danger mt-2" onclick="removeCategory(this)">削除</button>
+                ${isFirstCategory ? '' : '<button class="btn btn-danger mt-2" onclick="removeCategory(this)">削除</button>'}
             `;
 
             categoriesDiv.appendChild(categoryDiv);
@@ -154,6 +180,7 @@
         function calculate() {
             const totalAmount = parseInt(document.getElementById('totalAmount').value, 10);
             const participants = parseInt(document.getElementById('participants').value, 10);
+            const roundingUnit = parseInt(document.getElementById('roundingUnit').value, 10);
 
             if (isNaN(totalAmount) || isNaN(participants) || participants <= 0) {
                 showToast('有効な支払金額と参加人数を入力してください');
@@ -165,11 +192,14 @@
             let categoryData = [];
 
             for (let categoryElement of categoryElements) {
-                const name = categoryElement.querySelector('.categoryName').value;
+                let name = categoryElement.querySelector('.categoryName').value;
+                const placeholder = categoryElement.querySelector('.categoryName').placeholder;
+                if (!name) name = placeholder;
+
                 const count = parseInt(categoryElement.querySelector('.categoryParticipants').value, 10);
                 const weight = parseFloat(categoryElement.querySelector('.categoryWeight').value);
 
-                if (!name || isNaN(count) || count < 0 || isNaN(weight) || weight < 0) {
+                if (isNaN(count) || count < 0 || isNaN(weight) || weight < 0) {
                     showToast('有効なカテゴリ情報を入力してください');
                     return;
                 }
@@ -189,9 +219,9 @@
             const baseAmount = totalAmount / totalWeight;
             let individualAmounts = categoryData.map(category => ({
                 name: category.name,
-                amount: Math.round(baseAmount * category.weight / 500) * 500,
+                amount: Math.round(baseAmount * category.weight / roundingUnit) * roundingUnit,
                 count: category.count,
-                subtotal: Math.round(baseAmount * category.weight / 500) * 500 * category.count
+                subtotal: Math.round(baseAmount * category.weight / roundingUnit) * roundingUnit * category.count
             }));
 
             let distributedAmount = individualAmounts.reduce((sum, category) => sum + category.subtotal, 0);
@@ -238,11 +268,15 @@
         function saveData() {
             const totalAmount = document.getElementById('totalAmount').value;
             const participants = document.getElementById('participants').value;
+            const roundingUnit = document.getElementById('roundingUnit').value;
             const categoryElements = document.getElementsByClassName('category');
 
             let categories = [];
             for (let categoryElement of categoryElements) {
-                const name = categoryElement.querySelector('.categoryName').value;
+                let name = categoryElement.querySelector('.categoryName').value;
+                const placeholder = categoryElement.querySelector('.categoryName').placeholder;
+                if (!name) name = placeholder;
+
                 const count = categoryElement.querySelector('.categoryParticipants').value;
                 const weight = categoryElement.querySelector('.categoryWeight').value;
 
@@ -252,6 +286,7 @@
             const data = {
                 totalAmount,
                 participants,
+                roundingUnit,
                 categories
             };
 
@@ -264,6 +299,7 @@
             if (data) {
                 document.getElementById('totalAmount').value = data.totalAmount;
                 document.getElementById('participants').value = data.participants;
+                document.getElementById('roundingUnit').value = data.roundingUnit;
 
                 document.getElementById('categories').innerHTML = '<h3>参加者のカテゴリ</h3>';
                 data.categories.forEach(category => {
