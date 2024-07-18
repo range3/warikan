@@ -286,12 +286,34 @@
         }
 
         function makeCategoriesDraggable() {
-            dragula([document.getElementById('categories')], {
+            const drake = dragula([document.getElementById('categories')], {
                 moves: (el, container, handle) => handle.classList.contains('category-card-header'),
                 invalid: (el, handle) => handle.classList.contains('delete-btn')
-            }).on('drop', (el, target, source, sibling) => {
+            });
+
+            drake.on('drag', () => {
+                document.body.style.overflow = 'hidden';
+                document.addEventListener('touchmove', preventDefault, { passive: false });
+            });
+
+            drake.on('dragend', () => {
+                document.body.style.overflow = '';
+                document.removeEventListener('touchmove', preventDefault, { passive: false });
                 updateState();
             });
+
+            function preventDefault(e) {
+                e.preventDefault();
+            }
+
+            // drake.on('drag', () => {
+            //     document.body.style.overflow = 'hidden';
+            // });
+
+            // drake.on('dragend', () => {
+            //     document.body.style.overflow = '';
+            //     updateState();
+            // });
         }
 
         function updateLabelAndSave(input) {
