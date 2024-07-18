@@ -64,6 +64,15 @@
         .calculation-options {
             margin-bottom: 20px;
         }
+        .url-container {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .url-container input {
+            flex: 1;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -99,6 +108,11 @@
         <button class="btn btn-success" onclick="calculate()">計算</button>
 
         <div id="output" class="output mt-4"></div>
+
+        <div class="url-container">
+            <input type="text" id="url" class="form-control" readonly>
+            <button class="btn btn-outline-secondary" onclick="copyToClipboard()">コピー</button>
+        </div>
     </div>
 
     <!-- フライテキスト（通知メッセージ） -->
@@ -115,7 +129,16 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            loadData();
+            const params = new URLSearchParams(window.location.search);
+            const dataParam = params.get('data');
+
+            if (dataParam) {
+                loadDataFromUrl(dataParam);
+                updateUrlWithoutHash();
+            } else {
+                loadDataFromLocalStorage();
+            }
+
             if (document.getElementsByClassName('category').length === 0) {
                 addCategory();
             }
@@ -355,10 +378,14 @@
                 categories
             };
 
+            const encodedData = btoa(JSON.stringify(data));
+            const url = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
+            document.getElementById('url').value = url;
+
             localStorage.setItem('splitBillData', JSON.stringify(data));
         }
 
-        function loadData() {
+        function loadDataFromLocalStorage() {
             const data = JSON.parse(localStorage.getItem('splitBillData'));
 
             if (data) {
@@ -370,7 +397,36 @@
                 data.categories.forEach(category => {
                     addCategory(category.name, category.count, category.weight);
                 });
+
+                saveData(); // URLを更新
             }
+        }
+
+        function loadDataFromUrl(encodedData) {
+            const data = JSON.parse(atob(encodedData));
+
+            document.getElementById('totalAmount').value = data.totalAmount;
+            document.getElementById('participants').value = data.participants;
+            document.getElementById('roundingUnit').value = data.roundingUnit;
+
+            document.getElementById('categories').innerHTML = '<h3>参加者のカテゴリ</h3>';
+            data.categories.forEach(category => {
+                addCategory(category.name, category.count, category.weight);
+            });
+
+            saveData(); // URLを更新
+        }
+
+        function updateUrlWithoutHash() {
+            const url = `${window.location.origin}${window.location.pathname}`;
+            history.replaceState(null, '', url);
+        }
+
+        function copyToClipboard() {
+            const url = document.getElementById('url');
+            url.select();
+            document.execCommand('copy');
+            showToast('URLがクリップボードにコピーされました');
         }
 
         function showToast(message) {
