@@ -80,11 +80,11 @@
         <h1 class="mb-4">割り勘計算アプリ</h1>
         <div class="form-group">
             <label for="totalAmount">支払金額 (円):</label>
-            <input type="number" id="totalAmount" class="form-control" min="0" oninput="saveData()">
+            <input type="number" id="totalAmount" class="form-control" min="0" oninput="updateState()">
         </div>
         <div class="form-group">
             <label for="participants">参加人数:</label>
-            <input type="number" id="participants" class="form-control" min="1" oninput="updateCategoryMaxParticipants(); saveData()">
+            <input type="number" id="participants" class="form-control" min="1" oninput="updateCategoryMaxParticipants(); updateState()">
         </div>
         <div id="categories">
             <h3>参加者のカテゴリ</h3>
@@ -96,7 +96,7 @@
             <h3>計算オプション</h3>
             <div class="form-group">
                 <label for="roundingUnit">丸め単位:</label>
-                <select id="roundingUnit" class="form-control" onchange="saveData()">
+                <select id="roundingUnit" class="form-control" onchange="updateState()">
                     <option value="1000">1000円</option>
                     <option value="500">500円</option>
                     <option value="100">100円</option>
@@ -129,8 +129,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const dataParam = params.get('data');
+            const dataParam = getDataFromUrl();
 
             if (dataParam) {
                 loadDataFromUrl(dataParam);
@@ -144,6 +143,102 @@
             }
             makeCategoriesSortable();
         });
+
+        function encodeFormData(data) {
+            return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+        }
+
+        function decodeFormData(encodedData) {
+            return JSON.parse(decodeURIComponent(escape(atob(encodedData))));
+        }
+
+        function saveToLocalStorage(data) {
+            localStorage.setItem('splitBillData', encodeFormData(data));
+        }
+
+        function loadFromLocalStorage() {
+            const encodedData = localStorage.getItem('splitBillData');
+            if (encodedData) {
+                return decodeFormData(encodedData);
+            }
+            return null;
+        }
+
+        function addDataToUrl(encodedData) {
+            const url = new URL(window.location);
+            url.searchParams.set('data', encodedData);
+            return url.toString();
+        }
+
+        function getDataFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('data');
+        }
+
+        function updateState() {
+            const data = collectFormData();
+            const encodedData = encodeFormData(data);
+            document.getElementById('url').value = addDataToUrl(encodedData);
+            saveToLocalStorage(data);
+        }
+
+        function collectFormData() {
+            const totalAmount = document.getElementById('totalAmount').value;
+            const participants = document.getElementById('participants').value;
+            const roundingUnit = document.getElementById('roundingUnit').value;
+            const categoryElements = document.getElementsByClassName('category');
+
+            let categories = [];
+            for (let categoryElement of categoryElements) {
+                let name = categoryElement.querySelector('.categoryName').value;
+                const placeholder = categoryElement.querySelector('.categoryName').placeholder;
+                if (!name) name = placeholder;
+
+                const count = categoryElement.querySelector('.categoryParticipants').value;
+                const weight = categoryElement.querySelector('.categoryWeight').value;
+
+                categories.push({ name, count, weight });
+            }
+
+            return {
+                totalAmount,
+                participants,
+                roundingUnit,
+                categories
+            };
+        }
+
+        function loadDataFromLocalStorage() {
+            const data = loadFromLocalStorage();
+
+            if (data) {
+                fillForm(data);
+                updateState(); // URLを更新
+            }
+        }
+
+        function loadDataFromUrl(encodedData) {
+            const data = decodeFormData(encodedData);
+            fillForm(data);
+            saveToLocalStorage(data); // ローカルストレージを更新
+            updateState(); // URLを更新
+        }
+
+        function fillForm(data) {
+            document.getElementById('totalAmount').value = data.totalAmount;
+            document.getElementById('participants').value = data.participants;
+            document.getElementById('roundingUnit').value = data.roundingUnit;
+
+            document.getElementById('categories').innerHTML = '<h3>参加者のカテゴリ</h3>';
+            data.categories.forEach(category => {
+                addCategory(category.name, category.count, category.weight);
+            });
+        }
+
+        function updateUrlWithoutHash() {
+            const url = `${window.location.origin}${window.location.pathname}`;
+            history.replaceState(null, '', url);
+        }
 
         function addCategory(name = '', count = null, weight = 1) {
             const participants = parseInt(document.getElementById('participants').value, 10);
@@ -168,7 +263,7 @@
                 </div>
                 <div class="category-card-body">
                     <label>カテゴリ名:</label>
-                    <input type="text" class="form-control categoryName" value="${name}" placeholder="${placeholder}" oninput="saveData()">
+                    <input type="text" class="form-control categoryName" value="${name}" placeholder="${placeholder}" oninput="updateState()">
                     <label>人数: <span class="categoryParticipantsLabel">${count}</span></label>
                     <input type="range" class="custom-range categoryParticipants" value="${count}" min="0" max="${maxParticipants}" oninput="updateLabelAndSave(this)">
                     <label>傾斜:</label>
@@ -187,14 +282,14 @@
             categoriesDiv.appendChild(categoryDiv);
             updateDeleteButtons();
             makeCategoriesSortable();
-            saveData();
+            updateState();
         }
 
         function makeCategoriesSortable() {
             new Sortable(document.getElementById('categories'), {
                 handle: '.category-card-header',
                 animation: 150,
-                onEnd: saveData
+                onEnd: updateState
             });
         }
 
@@ -202,7 +297,7 @@
             const label = input.previousElementSibling.querySelector('.categoryParticipantsLabel');
             label.textContent = input.value;
             validateParticipants(input);
-            saveData();
+            updateState();
         }
 
         function decreaseWeight(button) {
@@ -210,7 +305,7 @@
             let weight = parseFloat(input.value);
             if (weight > 0) {
                 input.value = (weight - 0.1).toFixed(1);
-                saveData();
+                updateState();
             }
         }
 
@@ -218,14 +313,14 @@
             const input = button.parentElement.previousElementSibling;
             let weight = parseFloat(input.value);
             input.value = (weight + 0.1).toFixed(1);
-            saveData();
+            updateState();
         }
 
         function removeCategory(button) {
             const categoryDiv = button.closest('.category-card');
             categoryDiv.remove();
             updateDeleteButtons();
-            saveData();
+            updateState();
         }
 
         function updateDeleteButtons() {
@@ -252,7 +347,7 @@
                     categoryElement.querySelector('.categoryParticipantsLabel').textContent = maxParticipants;
                 }
             }
-            saveData();
+            updateState();
         }
 
         function validateParticipants(input) {
@@ -351,75 +446,6 @@
             if (calculatedTotal !== totalAmount) {
                 showToast('合計金額が一致しません。計算を確認してください。');
             }
-        }
-
-        function saveData() {
-            const totalAmount = document.getElementById('totalAmount').value;
-            const participants = document.getElementById('participants').value;
-            const roundingUnit = document.getElementById('roundingUnit').value;
-            const categoryElements = document.getElementsByClassName('category');
-
-            let categories = [];
-            for (let categoryElement of categoryElements) {
-                let name = categoryElement.querySelector('.categoryName').value;
-                const placeholder = categoryElement.querySelector('.categoryName').placeholder;
-                if (!name) name = placeholder;
-
-                const count = categoryElement.querySelector('.categoryParticipants').value;
-                const weight = categoryElement.querySelector('.categoryWeight').value;
-
-                categories.push({ name, count, weight });
-            }
-
-            const data = {
-                totalAmount,
-                participants,
-                roundingUnit,
-                categories
-            };
-
-            const encodedData = btoa(JSON.stringify(data));
-            const url = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
-            document.getElementById('url').value = url;
-
-            localStorage.setItem('splitBillData', JSON.stringify(data));
-        }
-
-        function loadDataFromLocalStorage() {
-            const data = JSON.parse(localStorage.getItem('splitBillData'));
-
-            if (data) {
-                document.getElementById('totalAmount').value = data.totalAmount;
-                document.getElementById('participants').value = data.participants;
-                document.getElementById('roundingUnit').value = data.roundingUnit;
-
-                document.getElementById('categories').innerHTML = '<h3>参加者のカテゴリ</h3>';
-                data.categories.forEach(category => {
-                    addCategory(category.name, category.count, category.weight);
-                });
-
-                saveData(); // URLを更新
-            }
-        }
-
-        function loadDataFromUrl(encodedData) {
-            const data = JSON.parse(atob(encodedData));
-
-            document.getElementById('totalAmount').value = data.totalAmount;
-            document.getElementById('participants').value = data.participants;
-            document.getElementById('roundingUnit').value = data.roundingUnit;
-
-            document.getElementById('categories').innerHTML = '<h3>参加者のカテゴリ</h3>';
-            data.categories.forEach(category => {
-                addCategory(category.name, category.count, category.weight);
-            });
-
-            saveData(); // URLを更新
-        }
-
-        function updateUrlWithoutHash() {
-            const url = `${window.location.origin}${window.location.pathname}`;
-            history.replaceState(null, '', url);
         }
 
         function copyToClipboard() {
