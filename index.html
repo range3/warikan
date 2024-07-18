@@ -31,6 +31,9 @@
         .btn-block {
             width: 100%;
         }
+        .calculation-options {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -44,20 +47,25 @@
             <label for="participants">参加人数:</label>
             <input type="number" id="participants" class="form-control" min="1" oninput="updateCategoryMaxParticipants(); saveData()">
         </div>
-        <div class="form-group">
-            <label for="roundingUnit">丸め単位:</label>
-            <select id="roundingUnit" class="form-control" onchange="saveData()">
-                <option value="1000">1000円</option>
-                <option value="500">500円</option>
-                <option value="100">100円</option>
-                <option value="1">1円</option>
-            </select>
-        </div>
         <div id="categories">
             <h3>参加者のカテゴリ</h3>
             <!-- カテゴリはJavaScriptで追加します -->
         </div>
         <button class="btn btn-primary btn-block mb-4" onclick="addCategory()">カテゴリ追加</button>
+        
+        <div class="calculation-options">
+            <h3>計算オプション</h3>
+            <div class="form-group">
+                <label for="roundingUnit">丸め単位:</label>
+                <select id="roundingUnit" class="form-control" onchange="saveData()">
+                    <option value="1000">1000円</option>
+                    <option value="500">500円</option>
+                    <option value="100">100円</option>
+                    <option value="1">1円</option>
+                </select>
+            </div>
+        </div>
+
         <button class="btn btn-success" onclick="calculate()">計算</button>
 
         <div id="output" class="output mt-4"></div>
