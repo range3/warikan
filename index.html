@@ -422,6 +422,9 @@
             let output = document.getElementById('output');
             output.innerHTML = '';
 
+            // 均等割の金額を計算
+            const equalShare = totalAmount / participants;
+
             const baseAmount = totalAmount / totalWeight;
             let individualAmounts = categoryData.map(category => ({
                 name: category.name,
@@ -461,6 +464,12 @@
                         <tr>
                             <td colspan="3"><strong>合計</strong></td>
                             <td><strong>${calculatedTotal}</strong></td>
+                        </tr>
+                        <tr>
+                            <td>参考 (均等割)</td>
+                            <td>${participants}</td>
+                            <td>${equalShare.toFixed(2)}</td>
+                            <td>${totalAmount}</td>
                         </tr>
                     </tbody>
                 </table>
