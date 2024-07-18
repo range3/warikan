@@ -289,7 +289,14 @@
             new Sortable(document.getElementById('categories'), {
                 handle: '.category-card-header',
                 animation: 150,
-                onEnd: updateState
+                touchStartThreshold: 10,
+                onStart: function(evt) {
+                    evt.item.querySelector('.delete-btn').style.pointerEvents = 'none';
+                },
+                onEnd: function(evt) {
+                    evt.item.querySelector('.delete-btn').style.pointerEvents = 'auto';
+                    updateState();
+                }
             });
         }
 
