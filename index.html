@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>割り勘計算アプリ</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.css">
     <style>
         body {
             margin: 20px;
@@ -23,17 +22,34 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: move;
+            cursor: pointer;
+        }
+        .category-card-header .header-container {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            flex-grow: 1;
+        }
+        .category-card-header .toggle-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
         }
         .category-card-body {
             padding: 15px;
+        }
+        .category-card-body-accordion {
+            display: none;
+        }
+        .category-card-body-accordion.show {
+            display: block;
         }
         .delete-btn {
             background-color: #ced4da;
             border: 0;
             padding: 8px 15px;
             font-size: 1.2rem;
-            line-height: 1;
             cursor: pointer;
             color: #495057;
             transition: background-color 0.3s, color 0.3s;
@@ -125,9 +141,8 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const dataParam = getDataFromUrl();
@@ -142,8 +157,15 @@
             if (document.getElementsByClassName('category').length === 0) {
                 addCategory();
             }
-            makeCategoriesDraggable();
+
+            closeAllAccordions(); // ページを新規に開いた時にすべて閉じる
         });
+
+        function showToast(message) {
+            const toastBody = document.getElementById('toast-body');
+            toastBody.textContent = message;
+            $('.toast').toast('show');
+        }
 
         function encodeFormData(data) {
             return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
@@ -192,9 +214,6 @@
             let categories = [];
             for (let categoryElement of categoryElements) {
                 let name = categoryElement.querySelector('.categoryName').value;
-                const placeholder = categoryElement.querySelector('.categoryName').placeholder;
-                if (!name) name = placeholder;
-
                 const count = categoryElement.querySelector('.categoryParticipants').value;
                 const weight = categoryElement.querySelector('.categoryWeight').value;
 
@@ -258,23 +277,30 @@
             const placeholder = categoryIndex === 0 ? '社会人' : `役職${categoryIndex + 1}`;
 
             categoryDiv.innerHTML = `
-                <div class="category-card-header">
-                    <span></span>
-                    <button class="delete-btn" onclick="removeCategory(this)">✕</button>
+                <div class="category-card-header" onclick="toggleAccordion(this)">
+                    <div class="header-container">
+                        <span class="toggle-icon">&#9654;</span>
+                        <span class="category-title">${placeholder} / ${count}人</span>
+                    </div>
+                    <button class="delete-btn" onclick="removeCategory(event, this)">✕</button>
                 </div>
                 <div class="category-card-body">
-                    <label>カテゴリ名:</label>
-                    <input type="text" class="form-control categoryName" value="${name}" placeholder="${placeholder}" oninput="updateState()">
-                    <label>人数: <span class="categoryParticipantsLabel">${count}</span></label>
-                    <input type="range" class="custom-range categoryParticipants" value="${count}" min="0" max="${maxParticipants}" oninput="updateLabelAndSave(this)">
-                    <label>傾斜:</label>
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-outline-secondary" onclick="decreaseWeight(this)">-</button>
-                        </div>
-                        <input type="number" class="form-control categoryWeight" value="${weight}" min="0" step="0.1" readonly>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" onclick="increaseWeight(this)">+</button>
+                    <div class="category-card-body-accordion">
+                        <label>カテゴリ名:</label>
+                        <input type="text" class="form-control categoryName" value="${name}" placeholder="${placeholder}" oninput="updateHeader(this); updateState()">
+                        <label>人数: <span class="categoryParticipantsLabel">${count}</span></label>
+                        <input type="range" class="custom-range categoryParticipants" value="${count}" min="0" max="${maxParticipants}" oninput="updateLabelAndSave(this)">
+                    </div>
+                    <div>
+                        <label>傾斜:</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-outline-secondary" onclick="decreaseWeight(this)">-</button>
+                            </div>
+                            <input type="number" class="form-control categoryWeight" value="${weight}" min="0" step="0.1" readonly>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" onclick="increaseWeight(this)">+</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -283,44 +309,45 @@
             categoriesDiv.appendChild(categoryDiv);
             updateDeleteButtons();
             updateState();
-        }
+            updateHeader(categoryDiv.querySelector('.categoryName')); // 新規追加後のヘッダーを更新
 
-        function makeCategoriesDraggable() {
-            const drake = dragula([document.getElementById('categories')], {
-                moves: (el, container, handle) => handle.classList.contains('category-card-header'),
-                invalid: (el, handle) => handle.classList.contains('delete-btn')
-            });
-
-            drake.on('drag', () => {
-                document.body.style.overflow = 'hidden';
-                document.addEventListener('touchmove', preventDefault, { passive: false });
-            });
-
-            drake.on('dragend', () => {
-                document.body.style.overflow = '';
-                document.removeEventListener('touchmove', preventDefault, { passive: false });
-                updateState();
-            });
-
-            function preventDefault(e) {
-                e.preventDefault();
-            }
-
-            // drake.on('drag', () => {
-            //     document.body.style.overflow = 'hidden';
-            // });
-
-            // drake.on('dragend', () => {
-            //     document.body.style.overflow = '';
-            //     updateState();
-            // });
+            // 新規追加後にアコーディオンを開く
+            const header = categoryDiv.querySelector('.category-card-header');
+            toggleAccordion(header);
         }
 
         function updateLabelAndSave(input) {
             const label = input.previousElementSibling.querySelector('.categoryParticipantsLabel');
             label.textContent = input.value;
             validateParticipants(input);
+            updateHeader(input.closest('.category-card').querySelector('.categoryName'));
             updateState();
+        }
+
+        function updateHeader(input) {
+            const categoryCard = input.closest('.category-card');
+            const titleElement = categoryCard.querySelector('.category-title');
+            const name = input.value || input.placeholder;
+            const count = categoryCard.querySelector('.categoryParticipants').value;
+
+            titleElement.textContent = `${name} / ${count}人`;
+        }
+
+        function toggleAccordion(headerElement) {
+            const categoryCard = headerElement.closest('.category-card');
+            const bodyAccordion = categoryCard.querySelector('.category-card-body-accordion');
+            const isOpen = bodyAccordion.classList.contains('show');
+
+            bodyAccordion.classList.toggle('show');
+            const iconElement = headerElement.querySelector('.toggle-icon');
+            iconElement.innerHTML = isOpen ? '&#9654;' : '&#9660;';
+        }
+
+        function closeAllAccordions() {
+            const accordions = document.querySelectorAll('.category-card-body-accordion');
+            accordions.forEach(acc => acc.classList.remove('show'));
+            const icons = document.querySelectorAll('.category-card-header .toggle-icon');
+            icons.forEach(icon => icon.innerHTML = '&#9654;');
         }
 
         function decreaseWeight(button) {
@@ -339,7 +366,8 @@
             updateState();
         }
 
-        function removeCategory(button) {
+        function removeCategory(event, button) {
+            event.stopPropagation(); // アコーディオンのトグルを防止
             const categoryDiv = button.closest('.category-card');
             categoryDiv.remove();
             updateDeleteButtons();
@@ -398,10 +426,7 @@
             let categoryData = [];
 
             for (let categoryElement of categoryElements) {
-                let name = categoryElement.querySelector('.categoryName').value;
-                const placeholder = categoryElement.querySelector('.categoryName').placeholder;
-                if (!name) name = placeholder;
-
+                let name = categoryElement.querySelector('.categoryName').value || categoryElement.querySelector('.categoryName').placeholder;
                 const count = parseInt(categoryElement.querySelector('.categoryParticipants').value, 10);
                 const weight = parseFloat(categoryElement.querySelector('.categoryWeight').value);
 
@@ -466,10 +491,10 @@
                             <td><strong>${calculatedTotal}</strong></td>
                         </tr>
                         <tr>
-                            <td>参考 (均等割)</td>
+                            <td><strong>参考 (均等割)</strong></td>
                             <td>${participants}</td>
-                            <td>${equalShare.toFixed(2)}</td>
-                            <td>${totalAmount}</td>
+                            <td>${equalShare.toFixed(2)}円/人</td>
+                            <td>${totalAmount}円</td>
                         </tr>
                     </tbody>
                 </table>
@@ -485,12 +510,6 @@
             url.select();
             document.execCommand('copy');
             showToast('URLがクリップボードにコピーされました');
-        }
-
-        function showToast(message) {
-            const toastBody = document.getElementById('toast-body');
-            toastBody.textContent = message;
-            $('.toast').toast('show');
         }
     </script>
 </body>
