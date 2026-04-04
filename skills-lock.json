@@ -4,7 +4,7 @@
     "adr": {
       "source": "range3/agent-skills",
       "sourceType": "github",
-      "computedHash": "815a6fb43bc00745f8ca4f290ec6abc007d5dbb7c9ffa6d743ba6b13c275b687"
+      "computedHash": "77b4924fc4c32f3c58ec64552c3db4f5a528f793b8f5ce52b337d32876783f91"
     },
     "context7": {
       "source": "intellectronica/agent-skills",

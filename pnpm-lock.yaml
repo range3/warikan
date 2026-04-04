@@ -20,6 +20,9 @@ importers:
       husky:
         specifier: ^9.1.7
         version: 9.1.7
+      skills:
+        specifier: ^1.4.8
+        version: 1.4.8
 
 packages:
 
@@ -390,6 +393,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  skills@1.4.8:
+    resolution: {integrity: sha512-qPpHj339Bbm2IxIzOiq+xQOFekmnEBrxTApDgh9dBsZnpyz5RjX/ChjgMlowXctCM0sKGrMiPIeddKqpdqhMEg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   string-width@4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
     engines: {node: '>=8'}
@@ -417,6 +425,11 @@ packages:
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
+
+  yaml@2.8.3:
+    resolution: {integrity: sha512-AvbaCLOO2Otw/lW5bmh9d/WEdcDFdQp2Z2ZUH3pX9U2ihyUY0nvLv7J6TrWowklRGPYbB/IuIMfYgxaCPg5Bpg==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
 
   yargs-parser@21.1.1:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
@@ -772,6 +785,10 @@ snapshots:
 
   semver@7.7.4: {}
 
+  skills@1.4.8:
+    dependencies:
+      yaml: 2.8.3
+
   string-width@4.2.3:
     dependencies:
       emoji-regex: 8.0.0
@@ -795,6 +812,8 @@ snapshots:
       strip-ansi: 6.0.1
 
   y18n@5.0.8: {}
+
+  yaml@2.8.3: {}
 
   yargs-parser@21.1.1: {}
 
