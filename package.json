@@ -21,6 +21,7 @@
 		"@biomejs/biome": "2.4.10",
 		"@commitlint/cli": "^20.5.0",
 		"@commitlint/config-conventional": "^20.5.0",
+		"@playwright/cli": "^0.1.5",
 		"@rolldown/plugin-babel": "^0.2.2",
 		"@tailwindcss/vite": "^4.2.2",
 		"@testing-library/jest-dom": "^6.9.1",
