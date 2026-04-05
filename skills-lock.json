@@ -4,7 +4,7 @@
 		"adr": {
 			"source": "range3/agent-skills",
 			"sourceType": "github",
-			"computedHash": "77b4924fc4c32f3c58ec64552c3db4f5a528f793b8f5ce52b337d32876783f91"
+			"computedHash": "00162b4dbc78e120833b903441bd3a1d1b605863368650f40d7097eb886b0fd3"
 		},
 		"context7": {
 			"source": "intellectronica/agent-skills",
@@ -15,6 +15,11 @@
 			"source": "range3/agent-skills",
 			"sourceType": "github",
 			"computedHash": "b3293c4faef72cb577487177e83e23f9f4b632132ace02f61d3fd883dbfe729f"
+		},
+		"playwright-cli": {
+			"source": "@playwright/cli",
+			"sourceType": "node_modules",
+			"computedHash": "45b90b409fb80cf08ee4e8b72377bddacfac3d1c1fac69bff5fd5342fad26adf"
 		},
 		"ui-ux-pro-max": {
 			"source": "nextlevelbuilder/ui-ux-pro-max-skill",
