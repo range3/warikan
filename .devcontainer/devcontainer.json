@@ -1,10 +1,9 @@
 {
-	"name": "Node.js & TypeScript",
-	"dockerFile": "Dockerfile",
-
-	"mounts": [
-		"source=${localEnv:HOME}/.claude/,target=/home/node/.claude,type=bind",
-		"source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind",
-		"source=${localEnv:HOME}/.config/gh,target=/home/node/.config/gh,type=bind"
-	]
+  "name": "Node.js & TypeScript",
+  "dockerFile": "Dockerfile",
+  "mounts": [
+    "source=${localEnv:HOME}/.claude/,target=/home/node/.claude,type=bind",
+    "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind",
+    "source=${localEnv:HOME}/.config/gh,target=/home/node/.config/gh,type=bind"
+  ]
 }
