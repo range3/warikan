@@ -1,35 +1,40 @@
 {
-	"version": 1,
-	"skills": {
-		"adr": {
-			"source": "range3/agent-skills",
-			"sourceType": "github",
-			"computedHash": "00162b4dbc78e120833b903441bd3a1d1b605863368650f40d7097eb886b0fd3"
-		},
-		"context7": {
-			"source": "intellectronica/agent-skills",
-			"sourceType": "github",
-			"computedHash": "fccbea654f8e35824a8bdce3e059e206efeb6c1fab9f6c096c3867e761081983"
-		},
-		"github-investigator": {
-			"source": "range3/agent-skills",
-			"sourceType": "github",
-			"computedHash": "b3293c4faef72cb577487177e83e23f9f4b632132ace02f61d3fd883dbfe729f"
-		},
-		"playwright-cli": {
-			"source": "@playwright/cli",
-			"sourceType": "node_modules",
-			"computedHash": "45b90b409fb80cf08ee4e8b72377bddacfac3d1c1fac69bff5fd5342fad26adf"
-		},
-		"ui-ux-pro-max": {
-			"source": "nextlevelbuilder/ui-ux-pro-max-skill",
-			"sourceType": "github",
-			"computedHash": "0a413bf988d06481f69bb81df2070741c3ba12dd9f1be2706d57f259c905992d"
-		},
-		"vercel-react-best-practices": {
-			"source": "vercel-labs/agent-skills",
-			"sourceType": "github",
-			"computedHash": "43ca6c197f8ec13055079da7053232d477068b03ca443f9ac1bc819b95cdd432"
-		}
-	}
+  "version": 1,
+  "skills": {
+    "adr": {
+      "source": "range3/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/adr/SKILL.md",
+      "computedHash": "00162b4dbc78e120833b903441bd3a1d1b605863368650f40d7097eb886b0fd3"
+    },
+    "context7": {
+      "source": "intellectronica/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/context7/SKILL.md",
+      "computedHash": "fccbea654f8e35824a8bdce3e059e206efeb6c1fab9f6c096c3867e761081983"
+    },
+    "github-investigator": {
+      "source": "range3/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/github-investigator/SKILL.md",
+      "computedHash": "1b8c1a104eb5bec9ce0de1b185c9438f1319c99d551af6c944bf817b92494f3d"
+    },
+    "playwright-cli": {
+      "source": "@playwright/cli",
+      "sourceType": "node_modules",
+      "computedHash": "45b90b409fb80cf08ee4e8b72377bddacfac3d1c1fac69bff5fd5342fad26adf"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "0a413bf988d06481f69bb81df2070741c3ba12dd9f1be2706d57f259c905992d"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212"
+    }
+  }
 }
