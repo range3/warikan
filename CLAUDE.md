@@ -1,14 +1,29 @@
-# プロジェクト概要
+# 原則
+- 後方互換性は必要ない
+- ドキュメントとコードが矛盾している場合は、コード優先
 
-## 設計判断ルール（ADR）
+# プロジェクト開始時
 
-このプロジェクトでは MADR 4.0.0（+ 独自フロントマター拡張）を用いて設計判断を記録する。
-ADR の作成・管理は `/adr` スキルで行う。
+```bash
+pnpm install
+pnpm exec skills experimental_sync
+```
 
-- 技術的な作業を始める前に `/adr` で既存の設計判断を確認し、関連する ADR があればコンテキストに含めること
-- 設計判断（技術選定、構成変更、パターン採用など）が行われた場合は `/adr` スキルを使って ADR を残すこと
+# ビルド・主要コマンド
 
-## ブラウザ操作（playwright-cli）
+```bash
+pnpm dev         # 開発サーバ
+pnpm build       # 型チェック + ビルド
+pnpm test        # テスト実行
+pnpm check       # Biome チェック
+pnpm check:fix   # Biome 自動修正
+```
+
+# ADR
+docs/decisions/INDEX.mdを参照しADRの一覧とサマリーを確認すること
+必要に応じて、ADR-NNNN-*.mdを参照する
+
+# ブラウザ操作（playwright-cli）
 
 プロジェクトローカルにインストール済み。グローバルインストールではなく `pnpm exec` 経由で使うこと。
 
