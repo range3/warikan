@@ -1,8 +1,7 @@
 ---
-status: "accepted"
-date: 2026-04-04
-decision: "React Compilerを採用し自動メモ化を有効にする"
-superseded-by: ""
+status: accepted
+created_at: 2026-04-04T00:00:00+09:00
+summary: "React Compilerを採用し自動メモ化を有効にする"
 ---
 
 # React Compiler を採用し自動メモ化を有効にする

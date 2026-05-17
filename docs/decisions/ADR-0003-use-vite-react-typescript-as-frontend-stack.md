@@ -1,8 +1,7 @@
 ---
-status: "accepted"
-date: 2026-04-04
-decision: "Vite + React + TypeScriptをフロントエンドスタックとして採用する"
-superseded-by: ""
+status: accepted
+created_at: 2026-04-04T00:00:00+09:00
+summary: "Vite + React + TypeScriptをフロントエンドスタックとして採用する"
 ---
 
 # Vite + React + TypeScript をフロントエンドスタックとして採用する

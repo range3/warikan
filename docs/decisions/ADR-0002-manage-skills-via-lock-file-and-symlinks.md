@@ -1,8 +1,7 @@
 ---
-status: "accepted"
-date: 2026-04-04
-decision: "skillsはskills-lock.json + pnpm exec skills experimental_installで管理し、.claude/skillsのシンボリックリンクのみgit管理する"
-superseded-by: ""
+status: accepted
+created_at: 2026-04-04T00:00:00+09:00
+summary: "skillsはskills-lock.json + pnpm exec skills experimental_installで管理し、.claude/skillsのシンボリックリンクのみgit管理する"
 ---
 
 # Skills管理をskills-lock.jsonとシンボリックリンクで行う

@@ -1,8 +1,7 @@
 ---
-status: "accepted"
-date: 2026-04-04
-decision: "Vitest + Testing Libraryをテストフレームワークとして採用する"
-superseded-by: ""
+status: accepted
+created_at: 2026-04-04T00:00:00+09:00
+summary: "Vitest + Testing Libraryをテストフレームワークとして採用する"
 ---
 
 # Vitest + Testing Library をテストフレームワークとして採用する

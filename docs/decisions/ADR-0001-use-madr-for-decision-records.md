@@ -1,8 +1,7 @@
 ---
-status: "accepted"
-date: 2026-04-04
-decision: "MADR 4.0.0で設計判断を記録する"
-superseded-by: ""
+status: accepted
+created_at: 2026-04-04T00:00:00+09:00
+summary: "MADR 4.0.0で設計判断を記録する"
 ---
 
 # MADR 4.0.0 を設計判断の記録に採用する
