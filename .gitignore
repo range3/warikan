@@ -12,3 +12,5 @@ playwright-report/
 .playwright-cli/
 .worktrees/
 .claude/worktrees/
+CLAUDE.local.md
+.claude/settings.local.json
