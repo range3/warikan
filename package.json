@@ -34,7 +34,7 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "husky": "^9.1.7",
     "jsdom": "^29.0.1",
-    "skills": "^1.4.8",
+    "skills": "^1.5.7",
     "tailwindcss": "^4.2.2",
     "typescript": "~5.9.3",
     "vite": "^8.0.3",

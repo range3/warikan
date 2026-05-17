@@ -5,7 +5,7 @@
       "source": "range3/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/adr/SKILL.md",
-      "computedHash": "00162b4dbc78e120833b903441bd3a1d1b605863368650f40d7097eb886b0fd3"
+      "computedHash": "c8b4a77f543a5663030b956a356fe1b4c8392e5c26e6502678d296be7a33f0bf"
     },
     "context7": {
       "source": "intellectronica/agent-skills",
