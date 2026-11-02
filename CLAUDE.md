@@ -39,5 +39,8 @@ Jetpack Compose + Material 3 only (no XML layouts). `ui/theme/WarikanTheme` uses
 
 ## Repository conventions
 
+- GitHub repo `range3/warikan` is shared with an older **web** version of the app. Its `main` (and `v1`) branches are the web app; this native Android app lives on the **`android` branch, an orphan branch with unrelated history**. Treat `android` as the base branch here: branch from it, open PRs against it (`gh pr create --base android`), and never merge/rebase/PR between `android` and `main`.
+- `adb` is not on PATH; use `<sdk.dir from local.properties>/platform-tools/adb` (e.g. `adb devices -l` to check the connected phone before `installDebug` / `connectedDebugAndroidTest`).
+
 - `.gitattributes` normalizes to LF; `*.bat` is CRLF and `*.jar` is binary.
 - Device-specific IDE files (`.idea/deviceManager.xml`, `.idea/deploymentTargetSelector.xml`), `.kotlin/`, and `local.properties` are git-ignored.
