@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 "warikan" (割り勘, bill-splitting) is a single-module Android app (`:app`, package `com.range3.warikan`) for splitting a drinking-party bill with seniority-based slopes. It is an early prototype iterated by trying builds on a real phone. **`docs/SPEC.md` is the living spec** — read it first and append one-line decisions there instead of writing ADRs.
 
-- `domain/` — pure Kotlin model (`Bill`, `Group`, `Share.Fixed`/`Share.Sloped`, `Prepaid`) and `Bill.calculate()`; all money is `Long` yen with integer ceil math. Covered by `CalculatorTest`.
-- `ui/WarikanViewModel` holds the `Bill` as Compose state and derives the result; `ui/WarikanScreen` is the single screen. No navigation, persistence, or DI yet.
+- `domain/` — pure Kotlin, `@Serializable` model (`Bill`, `Group`, `Share.Fixed`/`Share.Sloped`, `Prepaid`, `Preset`, `DefaultPresets`), `Bill.calculate()` and `Bill.switchShare()`. All money is `Long` yen with exact integer rounding (sloped base kept as a fraction). Covered by `CalculatorTest`.
+- `data/AppStore` persists the whole `SavedState` (bill + presets) as one JSON string in Preferences DataStore. Decode failures fall back to defaults (no migrations).
+- `ui/WarikanViewModel` holds state as Compose `mutableStateOf`, saves on every change once `loaded`; it takes a nullable `AppStore` so previews can use `WarikanViewModel()`. Two screens (`WarikanScreen`, `SettingsScreen`) switched by a boolean in `MainActivity` + `BackHandler` — no Navigation library. No DI.
 - Icons are local vector drawables in `res/drawable` (material3 1.4 no longer pulls in `material-icons`).
 
 ## Commands
