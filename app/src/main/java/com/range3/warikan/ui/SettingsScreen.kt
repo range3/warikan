@@ -79,7 +79,7 @@ fun SettingsScreen(vm: WarikanViewModel, onBack: () -> Unit) {
         ) {
             item {
                 Text(
-                    "飲み会の画面に追加ボタンとして並ぶグループです。偉い人が上になるように並べてください。" +
+                    "飲み会の画面に追加ボタンとして並ぶグループです。多く払うグループから順に並べておくと選びやすくなります。" +
                         "傾斜グループの金額は「基準」(±0) との差額で決まります。",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
