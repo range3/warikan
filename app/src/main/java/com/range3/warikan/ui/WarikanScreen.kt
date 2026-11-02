@@ -415,17 +415,16 @@ private fun LabeledRow(label: String, content: @Composable () -> Unit) {
     }
 }
 
+private fun previewViewModel() = WarikanViewModel().apply {
+    setTotal(60_000)
+    addPrepaid()
+    presets.filter { it.name in setOf("課長", "社員", "学生") }.forEach(::addGroup)
+}
+
 @Preview(showBackground = true, heightDp = 1400)
 @Composable
 private fun WarikanScreenPreview() {
     WarikanTheme {
-        WarikanScreen(
-            WarikanViewModel().apply {
-                setTotal(60_000)
-                addPrepaid()
-                presets.filter { it.name in setOf("課長", "社員", "学生") }.forEach(::addGroup)
-            },
-            onOpenSettings = {},
-        )
+        WarikanScreen(previewViewModel(), onOpenSettings = {})
     }
 }

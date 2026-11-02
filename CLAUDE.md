@@ -10,6 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `data/AppStore` persists the whole `SavedState` (bill + presets) as one JSON string in Preferences DataStore. Decode failures fall back to defaults (no migrations).
 - `ui/WarikanViewModel` holds state as Compose `mutableStateOf`, saves on every change once `loaded`; it takes a nullable `AppStore` so previews can use `WarikanViewModel()`. Two screens (`WarikanScreen`, `SettingsScreen`) switched by a boolean in `MainActivity` + `BackHandler` — no Navigation library. No DI.
 - Icons are local vector drawables in `res/drawable` (material3 1.4 no longer pulls in `material-icons`).
+- Launcher icon: adaptive icon only (`mipmap-anydpi`, no legacy PNGs since minSdk 34). Foreground is `drawable-nodpi/ic_launcher_foreground.png` cut from `art/icon/app_icon_source.jpg` by `art/icon/make_icon.ps1`; background is the `ic_launcher_background` color; `ic_launcher_monochrome.xml` is a hand-made vector of the same coin stacks for themed icons.
 
 ## Commands
 
