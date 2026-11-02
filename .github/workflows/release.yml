@@ -32,7 +32,7 @@ jobs:
           echo "code=$(( major * 10000 + minor * 100 + patch ))" >> "$GITHUB_OUTPUT"
 
       # gradle/gradle-daemon-jvm.properties が Java 25 を要求するので合わせる
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "25"
