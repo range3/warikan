@@ -31,6 +31,12 @@ Run from the repo root (Windows: `./gradlew` works in Git Bash; `gradlew.bat` in
 ./gradlew connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.range3.warikan.ExampleInstrumentedTest
 ```
 
+## Releases
+
+APKs are distributed via GitHub Releases. Pushing a tag `vMAJOR.MINOR.PATCH` (on the `android` branch) runs `.github/workflows/release.yml`: unit tests → `assembleRelease` → `gh release create` with `warikan-<tag>.apk` attached. `versionName`/`versionCode` come from the tag (`-PversionName`, `-PversionCode = MAJOR*10000 + MINOR*100 + PATCH`); local builds default to `dev`/`1`.
+
+Release signing is configured only when `SIGNING_STORE_FILE` (+ `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS`, `SIGNING_KEY_PASSWORD`) env vars are set; CI gets them from repo secrets (`SIGNING_KEYSTORE_BASE64` holds the keystore). To smoke-test an R8 release build locally, point those vars at `~/.android/debug.keystore` (`android` / `androiddebugkey`).
+
 ## Build setup (non-obvious points)
 
 - **Very new toolchain**: AGP 9.5, Gradle 9.6, Kotlin 2.2, compileSdk/targetSdk 37, **minSdk 34**. The Gradle daemon JVM is Java 25 (`gradle/gradle-daemon-jvm.properties`, auto-provisioned via the foojay resolver); app bytecode targets Java 11.
